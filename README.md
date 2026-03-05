@@ -1,2 +1,2 @@
 # ArtGate
-The code will be released after it has been cleaned up.
+This is the official code repository for the paper "ArtGate: Injecting Fake Artifact Features into CLIP for AI-Generated Image Detection".
