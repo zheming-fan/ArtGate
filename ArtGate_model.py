@@ -15,7 +15,7 @@ class ArtGate_CLIP(nn.Module):
         super(ArtGate_CLIP, self).__init__()
 
         self.model = CLIPModel.from_pretrained(name)
-        clip_state_dict = torch.load('/home/ubuntu/2026/ArtGate/weights/model_clip.pth', map_location='cpu')
+        clip_state_dict = torch.load('/home/ubuntu/2026/ArtGate/weights/model_clip_progan.pth', map_location='cpu')
         self.model.load_state_dict(clip_state_dict, strict=True)  # 加载模型参数
   
         self.resnetmodel = freq_resnet50()
