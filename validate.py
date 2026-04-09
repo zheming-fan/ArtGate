@@ -49,11 +49,6 @@ def validate_artgate(model, opt, max_real_size=None, max_fake_size=None):
   
         if opt.fc_class2:
             probs = torch.softmax(model(in_tens,freq_img), dim=1)[:, 1]  # 取类别 1 的概率
-        elif opt.detect_method == "EFFORT_sd":
- 
-            probs = model(in_tens, inference=True)   
-            probs = probs["prob"]
-
         else:
             probs = model(in_tens,freq_img).sigmoid() 
 

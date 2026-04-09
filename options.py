@@ -42,7 +42,7 @@ class TrainOptions():
         parser.add_argument('--no_flip', action='store_true', help='if specified, do not flip the images for data augmentation')
 
         # parser.add_argument('--is_single',action='store_true',help='evaluate image by image')
-        parser.add_argument('--detect_method', type=str,default='CNNSpot', help='choose the detection method')
+        parser.add_argument('--detect_method', type=str,default='ArtGate', help='choose the detection method')
         parser.add_argument('--dataroot', default='/hotdata/share/AIGCDetect', help='path to images (should have subfolders trainA, trainB, valA, valB, etc)')
         parser.add_argument('--classes', default='airplane,bird,bicycle,boat,bottle,bus,car,cat,cow,chair,diningtable,dog,person,pottedplant,motorbike,tvmonitor,train,sheep,sofa,horse', help='image classes to train on')
         parser.add_argument('--mode', default='binary')
