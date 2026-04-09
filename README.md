@@ -137,7 +137,7 @@ python ArtGate_eval.py \
     --model_path ./weights/model_artgate_progan.pth
 ```
 
-To test with JPEG noise augmentation:
+To test with random JPEG:
 
 ```bash
 python ArtGate_eval.py \
@@ -145,7 +145,7 @@ python ArtGate_eval.py \
     --noise_type jpeg
 ```
 
-> **Quick test tip:** Use `--max_test_image` to limit the number of images per test set for a fast sanity check:
+> **Quick test tip:** Use `--max_test_image` to limit the number of images per test set for a fast test:
 > ```bash
 > python ArtGate_eval.py \
 >     --model_path ./weights/model_artgate_progan.pth \
