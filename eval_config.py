@@ -2,7 +2,7 @@
 
 
 # root to the testsets
-dataroot = '/home/ubuntu/data/zhemingfan/dataset/AIGCDetectionBenchMark/AIGCDetectionBenchMark/test'
+dataroot = '/home/ubuntu/data/zhemingfan/dataset/AIGCDetectBenchMark/test'
 
 
 # list of synthesis algorithms

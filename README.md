@@ -89,14 +89,14 @@ model = ArtGate_CLIP(name='./pretrained/clip-vit-large-patch14', num_classes=1)
 
 ## Dataset Download
 
-This project uses the **AIGCDetectionBenchMark** dataset for evaluation.
+This project uses the **AIGCDetectBenchMark** dataset for evaluation.
 
-Dataset repository: [AIGCDetectionBenchMark](https://github.com/Ekko-zn/AIGCDetectBenchmark)
+Dataset repository: [AIGCDetectBenchMark](https://github.com/Ekko-zn/AIGCDetectBenchmark)
 
 Expected directory structure:
 
 ```
-AIGCDetectionBenchMark/
+AIGCDetectBenchMark/
 └── test/
     ├── progan/
     ├── stylegan/
@@ -123,7 +123,7 @@ After downloading, update the dataset path in `eval_config.py`:
 
 ```python
 # eval_config.py
-dataroot = '/path/to/AIGCDetectionBenchMark/test'
+dataroot = '/path/to/AIGCDetectBenchMark/test'
 ```
 
 ---

@@ -86,14 +86,14 @@ model = ArtGate_CLIP(name='./pretrained/clip-vit-large-patch14', num_classes=1)
 
 ## 数据集下载
 
-本项目使用 **AIGCDetectionBenchMark** 数据集进行测试。
+本项目使用 **AIGCDetectBenchMark** 数据集进行测试。
 
-数据集下载地址：[AIGCDetectionBenchMark](https://github.com/Ekko-zn/AIGCDetectBenchmark)
+数据集下载地址：[AIGCDetectBenchMark](https://github.com/Ekko-zn/AIGCDetectBenchmark)
 
 数据集目录结构如下：
 
 ```
-AIGCDetectionBenchMark/
+AIGCDetectBenchMark/
 └── test/
     ├── progan/
     ├── stylegan/
@@ -120,7 +120,7 @@ AIGCDetectionBenchMark/
 
 ```python
 # eval_config.py
-dataroot = '/path/to/AIGCDetectionBenchMark/test'
+dataroot = '/path/to/AIGCDetectBenchMark/test'
 ```
 
 ---
