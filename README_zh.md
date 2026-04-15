@@ -2,6 +2,7 @@
 
 本仓库为论文 **"ArtGate: Injecting Fake Artifact Features into CLIP for AI-Generated Image Detection"** 的官方代码仓库。
 
+![Overview of ArtGate](figure.png)
 
 ## 环境配置
 
