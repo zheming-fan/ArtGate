@@ -4,6 +4,7 @@ This is the official code repository for the paper **"ArtGate: Injecting Fake Ar
 
 > Chinese README: [README_zh.md](README_zh.md)
 
+![Overview of ArtGate](figure.png)
 
 ## Environment Setup
 
