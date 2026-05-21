@@ -2,6 +2,8 @@
 
 This is the official code repository for the paper **"ArtGate: Injecting Fake Artifact Features into CLIP for AI-Generated Image Detection"**.
 
+🎉 **News (2026/01/04):** Our paper has been accepted by **IEEE Transactions on Multimedia (TMM)**.
+
 > Chinese README: [README_zh.md](README_zh.md)
 
 ![Overview of ArtGate](figure.png)
