@@ -154,3 +154,24 @@ python ArtGate_eval.py \
 >     --model_path ./weights/model_artgate_progan.pth \
 >     --max_test_image 100
 > ```
+
+## Acknowledgments
+
+This project benefited from the implementation and ideas provided by the following open-source repositories. We gratefully acknowledge the authors for making their code and resources publicly available:
+
+* SAFE: https://github.com/Ouxiang-Li/SAFE
+* AIGCDetectBenchmark: https://github.com/Ekko-zn/AIGCDetectBenchmark
+
+## Citation
+
+If you find this work useful in your research, please cite our paper:
+
+```bibtex
+@article{fan2026artgate,
+  title={ArtGate: Injecting Fake Artifact Features into CLIP for AI-Generated Image Detection},
+  author={Fan, Zheming and Zhu, Guopu and Sun, Long and Ding, Feng and Zhang, Hongli and Wu, Ligang},
+  journal={IEEE Transactions on Multimedia},
+  year={2026},
+  publisher={IEEE}
+}
+```
