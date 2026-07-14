@@ -1,149 +1,75 @@
 # ArtGate
 
-本仓库为论文 **"ArtGate: Injecting Fake Artifact Features into CLIP for AI-Generated Image Detection"** 的官方代码仓库。
-
-![Overview of ArtGate](figure.png)
+论文 **“ArtGate: Injecting Fake Artifact Features into CLIP for AI-Generated Image Detection”** 官方代码，已被 IEEE Transactions on Multimedia 接收。
 
 ## 环境配置
 
+本项目只支持 NVIDIA GPU 推理，推荐使用 Python 3.10。下面的命令从创建环境开始，可以直接依次执行。
+
+### 1. 创建 Conda 环境
+
 ```bash
-# 创建 conda 环境
-conda create --name artgate python=3.10
+conda create -n artgate python=3.10 -y
 conda activate artgate
-
-# 安装 PyTorch（CUDA 版本）
-pip install torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0
-
-# 安装依赖
-pip install scikit-learn tqdm ftfy regex kornia
-pip install huggingface_hub requests tokenizers==0.21
-pip install loralib timm opencv-python pandas tensorboard
-pip install efficientnet_pytorch imageio scikit-image blobfile
-pip install PyWavelets peft==0.13.2 tensorboardX
-
-conda install -c conda-forge mpi4py
-
-# 卸载环境中的 transformers（使用项目内置版本）
-pip uninstall transformers
+python -m pip install --upgrade pip setuptools wheel
 ```
 
----
+### 2. 安装 CUDA 版 PyTorch
 
-## 模型下载
-
-从以下链接下载预训练权重：
-
-**Google Drive：** [ArtGate Weights](https://drive.google.com/drive/folders/1jK0BC6_rRx9f9yWn8MJoGfQYLpRy7e9T?usp=sharing)
-
-需要下载的文件：
-
-| 文件名 | 说明 |
-|---|---|
-| `freq_progan.pth` | 训练阶段1: 频域伪影分支 (ResNet-50) 权重 |
-| `model_clip_progan.pth` | 训练阶段2: 微调后的 CLIP 骨干网络权重 |
-| `model_artgate_progan.pth` | 训练阶段3: ArtGate 主模型权重 |
-
-此外，还需要下载 CLIP 预训练模型（`openai/clip-vit-large-patch14`）：
+安装 CUDA 12.4 版本：
 
 ```bash
-# 通过 huggingface_hub 下载
-python -c "from huggingface_hub import snapshot_download; snapshot_download('openai/clip-vit-large-patch14', local_dir='./pretrained/clip-vit-large-patch14')"
+python -m pip install torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cu124
 ```
 
----
+### 3. 安装项目依赖
 
-## 模型文件结构
+在 ArtGate 仓库根目录执行：
 
-将所有权重文件按如下结构放置：
-
-```
-ArtGate/
-├── weights/
-│   ├── model_artgate_progan.pth
-│   ├── model_clip_progan.pth
-│   └── freq_progan.pth
-└── pretrained/
-    └── clip-vit-large-patch14/   # CLIP 基础模型
+```bash
+python -m pip install -r requirements.txt
 ```
 
-下载完成后，修改 `ArtGate_model.py` 中的模型路径以匹配本地路径：
 
-```python
-# ArtGate_model.py
-self.model = CLIPModel.from_pretrained('./pretrained/clip-vit-large-patch14')
-clip_state_dict = torch.load('./weights/model_clip_progan.pth', map_location='cpu')
-...
-state_dict = torch.load('./weights/freq_progan.pth', map_location='cpu', weights_only=False)
+
+### 4. 验证环境
+
+```bash
+python -c "import torch, torchvision, transformers, peft, kornia, sklearn; print('torch:', torch.__version__); print('torchvision:', torchvision.__version__); print('transformers:', transformers.__version__); print('peft:', peft.__version__); print('CUDA available:', torch.cuda.is_available()); print('CUDA runtime:', torch.version.cuda)"
+nvidia-smi
 ```
 
-同样修改 `ArtGate_eval.py` 中的 CLIP 路径：
+其中 `CUDA available` 应输出 `True`。
 
-```python
-# ArtGate_eval.py
-model = ArtGate_CLIP(name='./pretrained/clip-vit-large-patch14', num_classes=1)
-```
+## 模型权重
 
----
+从 [Google Drive](https://drive.google.com/drive/folders/1jK0BC6_rRx9f9yWn8MJoGfQYLpRy7e9T?usp=sharing) 下载 `model_artgate_progan.pth`，放到 `weights/` 目录即可。
 
-## 数据集下载
 
-本项目使用 **AIGCDetectBenchMark** 数据集进行测试。
 
-数据集下载地址：[AIGCDetectBenchMark](https://github.com/Ekko-zn/AIGCDetectBenchmark)
+## 数据集
 
-数据集目录结构如下：
+下载 [AIGCDetectBenchMark](https://github.com/Ekko-zn/AIGCDetectBenchmark)。`--dataset_root` 指向包含 `progan`、`stylegan` 等子目录的路径；每个测试子集内应包含 `0_real/` 和 `1_fake/`。
 
-```
-AIGCDetectBenchMark/
-└── test/
-    ├── progan/
-    ├── stylegan/
-    ├── biggan/
-    ├── cyclegan/
-    ├── stargan/
-    ├── gaugan/
-    ├── stylegan2/
-    ├── whichfaceisreal/
-    ├── ADM/
-    ├── Glide/
-    ├── Midjourney/
-    ├── stable_diffusion_v_1_4/
-    ├── stable_diffusion_v_1_5/
-    ├── VQDM/
-    ├── wukong/
-    ├── DALLE2/
-    └── sd_xl/
-```
-
-每个子目录下需包含 `0_real/` 和 `1_fake/` 两个文件夹。
-
-下载完成后，修改 `eval_config.py` 中的数据集路径：
-
-```python
-# eval_config.py
-dataroot = '/path/to/AIGCDetectBenchMark/test'
-```
-
----
-
-## 模型测试
-
-确保环境、模型权重和数据集均已就绪后，运行以下命令进行测试：
+## 评测
 
 ```bash
 python ArtGate_eval.py \
-    --model_path ./weights/model_artgate_progan.pth
+  --model_path ./weights/model_artgate_progan.pth \
+  --dataset_root /path/to/AIGCDetectBenchMark/test
 ```
 
-```bash
-python ArtGate_eval.py \
-    --model_path ./weights/model_artgate_progan.pth \
-    --noise_type jpeg
-```
+可用 `--max_test_image 100` 缩小测试范围进行快速测试；多卡机器可通过 `--device cuda:1` 指定显卡。CSV 结果保存在 `results/ArtGate/`。
 
-> **快速测试提示：** 可以使用 `--max_test_image` 限制每个测试集的图片数量，以快速验证流程是否正常：
-> ```bash
-> python ArtGate_eval.py \
->     --model_path ./weights/model_artgate_progan.pth \
->     --max_test_image 100
-> ```
+
+## 引用
+
+```bibtex
+@article{fan2026artgate,
+  title={ArtGate: Injecting Fake Artifact Features into CLIP for AI-Generated Image Detection},
+  author={Fan, Zheming and Zhu, Guopu and Sun, Long and Ding, Feng and Zhang, Hongli and Wu, Ligang},
+  journal={IEEE Transactions on Multimedia},
+  year={2026},
+  publisher={IEEE}
+}
+```

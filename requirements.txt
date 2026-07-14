@@ -1,0 +1,14 @@
+torch==2.6.0
+torchvision==0.21.0
+transformers==4.48.0
+peft==0.13.2
+tokenizers==0.21.0
+huggingface-hub
+kornia
+PyWavelets
+scikit-learn
+scikit-image
+scipy
+numpy
+opencv-python
+Pillow

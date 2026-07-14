@@ -1,92 +1,109 @@
-from ArtGate_model import ArtGate_CLIP
-import os
-import csv
-import torch
-import numpy as np
-from validate import validate_artgate
-from options import TestOptions
-from eval_config import *
-from PIL import ImageFile
-import random
+"""Command-line evaluation entry point for ArtGate."""
 
-def mkdir(path):
-    if not os.path.exists(path):
-        os.makedirs(path)
+from __future__ import annotations
+
+import csv
+import random
+from pathlib import Path
+
+import numpy as np
+import torch
+from PIL import ImageFile
+
+from models import ArtGateCLIP
+from options import TestOptions
+from validate import validate_artgate
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
+METRIC_NAMES = [
+    "accuracy",
+    "average_precision",
+    "real_accuracy",
+    "fake_accuracy",
+    "f1",
+    "auc",
+    "tpr_at_fpr_10",
+    "tpr_at_fpr_1",
+    "eer",
+]
+
+
 def set_random_seed(seed=42):
+    random.seed(seed)
+    np.random.seed(seed)
     torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
     torch.backends.cudnn.benchmark = False
     torch.backends.cudnn.deterministic = True
-    np.random.seed(seed)
-    random.seed(seed)
-
-set_random_seed()
-# Running tests
 
 
-opt = TestOptions().parse(print_options=True) 
-
-
-
-model_name = os.path.basename(opt.model_path).replace('.pth', '')
-results_dir=f"./results/{opt.detect_method}"
-mkdir(results_dir)
-
-rows = [["{} model testing on...".format(model_name)],
-        ['testset', 'accuracy', 'avg precision', 'r_acc', 'f_acc']]
-
-print("{} model testing on...".format(model_name))
-
-all_metrics = []  
-
-for v_id, val in enumerate(vals):
-    opt.dataroot = '{}/{}'.format(dataroot, val)
-
-
-    model = ArtGate_CLIP(name="/home/ubuntu/data/zhemingfan/mllm/openai-clip-vit-large-patch14", num_classes=1)
-    state_dict = torch.load(opt.model_path, map_location='cpu')
-    model.load_state_dict(state_dict['model'], strict=True)
-    model.cuda()
-    model.eval()
-
-
-    
+def load_model(opt, device):
+    model = ArtGateCLIP(num_classes=2 if opt.fc_class2 else 1)
+    checkpoint = torch.load(opt.model_path, map_location="cpu", weights_only=True)
+    state_dict = (
+        checkpoint["model"]
+        if isinstance(checkpoint, dict) and "model" in checkpoint
+        else checkpoint
+    )
     try:
-        if 'model' in state_dict:
-            model.load_state_dict(state_dict['model'], strict=True)
-        else:
-            model.load_state_dict(state_dict, strict=True)
-    except:
-        print("[ERROR] model.load_state_dict() error")
-    model.cuda()
-    model.eval()
+        model.load_state_dict(state_dict, strict=True)
+    except RuntimeError as error:
+        raise RuntimeError(
+            "The file passed to --model_path must contain the complete ArtGate "
+            "state_dict (CLIP, LoRA, artifact branch, and classifier)."
+        ) from error
+    return model.to(device).eval()
 
 
-    opt.process_device = torch.device("cpu")
-    f1, auc, t10, t1, acc, ap, r_acc, f_acc, _, _ ,eer= validate_artgate(model, opt, max_real_size=opt.max_test_image, max_fake_size=opt.max_test_image)
+def evaluate(opt):
+    set_random_seed(opt.seed)
+    if not opt.device.startswith("cuda"):
+        raise ValueError("ArtGate evaluation is GPU-only; --device must be cuda or cuda:N")
+    if not torch.cuda.is_available():
+        raise RuntimeError("ArtGate evaluation requires an NVIDIA GPU with CUDA support")
+    device = torch.device(opt.device)
+    model = load_model(opt, device)
+    model_name = Path(opt.model_path).stem
+    rows = [["testset", *METRIC_NAMES]]
+    all_metrics = []
 
-    row = [val, acc, ap, r_acc, f_acc, f1, auc, t10, t1,eer]
-    rows.append(row)
-    all_metrics.append(row[1:]) 
-   
-    print("({}) acc: {}; ap: {}; r_acc: {}; f_acc: {}; f1: {}; auc: {}; T10: {}; T1: {}; EER: {}".format(
-        val, acc, ap, r_acc, f_acc, f1, auc, t10, t1,eer))
-    
+    for testset in opt.testsets:
+        opt.dataroot = str(Path(opt.dataset_root) / testset)
+        values = validate_artgate(
+            model,
+            opt,
+            max_real_size=opt.max_test_image,
+            max_fake_size=opt.max_test_image,
+            device=device,
+        )
+        f1, auc, t10, t1, acc, ap, real_acc, fake_acc, _, _, eer = values
+        metrics = [acc, ap, real_acc, fake_acc, f1, auc, t10, t1, eer]
+        rows.append([testset, *metrics])
+        all_metrics.append(metrics)
+        print(
+            f"{testset}: "
+            + "; ".join(
+                f"{name}={value:.4f}"
+                for name, value in zip(METRIC_NAMES, metrics)
+            )
+        )
 
-mean_metrics = np.mean(np.array(all_metrics, dtype=np.float32), axis=0)
-rows.append(["Average"] + list(mean_metrics))
+    mean_metrics = np.mean(np.asarray(all_metrics, dtype=np.float64), axis=0)
+    rows.append(["Average", *mean_metrics.tolist()])
+    output_dir = Path(opt.results_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_path = output_dir / f"{model_name}_{opt.noise_type or 'clean'}.csv"
+    with output_path.open("w", newline="", encoding="utf-8") as handle:
+        csv.writer(handle).writerows(rows)
+    print(f"Results written to {output_path}")
+    return output_path
 
 
-print("Average metrics:")
-print("acc: {:.4f}; ap: {:.4f}; r_acc: {:.4f}; f_acc: {:.4f}; f1: {:.4f}; auc: {:.4f}; T10: {:.4f}; T1: {:.4f}; EER: {:.4f}".format(
-    *mean_metrics))
+def main():
+    evaluate(TestOptions().parse(print_options=True))
 
 
-
-csv_name = results_dir + '/{}_{}.csv'.format(opt.detect_method, opt.noise_type)
-with open(csv_name, 'a+') as f:
-    csv_writer = csv.writer(f, delimiter=',')
-    csv_writer.writerows(rows)
+if __name__ == "__main__":
+    main()

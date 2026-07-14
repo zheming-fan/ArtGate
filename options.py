@@ -147,6 +147,13 @@ class TestOptions():
     def initialize(self, parser):
 
         parser.add_argument('--max_test_image', type=int, default=None)
+        parser.add_argument('--dataset_root', type=str, default='./datasets',
+                            help='directory containing one folder per test set')
+        parser.add_argument('--testsets', type=str,
+                            default='progan,stylegan,biggan,cyclegan,stargan,gaugan,stylegan2,whichfaceisreal,ADM,Glide,Midjourney,stable_diffusion_v_1_4,stable_diffusion_v_1_5,VQDM,wukong,DALLE2,sd_xl')
+        parser.add_argument('--device', type=str, default='cuda',
+                            help='CUDA device, e.g. cuda or cuda:1')
+        parser.add_argument('--seed', type=int, default=42)
         # data augmentation
         parser.add_argument('--rz_interp', default='bilinear')
         parser.add_argument('--blur_sig', default='1.0')
@@ -170,7 +177,7 @@ class TestOptions():
 
         parser.add_argument('--model_path',type=str,default='./model_artgate_progan.pth',help='the path of detection model')
         # parser.add_argument('--is_single',action='store_true',help='evaluate image by image')
-        parser.add_argument('--detect_method', type=str,default='CNNSpot', help='choose the detection method')
+        parser.add_argument('--detect_method', type=str,default='ArtGate', help='choose the detection method')
         parser.add_argument('--noise_type', type=str,default=None, help='such as jpg, blur and resize')
         
         # path of processing model
@@ -237,6 +244,9 @@ class TestOptions():
         opt.blur_sig = [float(s) for s in opt.blur_sig.split(',')]
         opt.jpg_method = opt.jpg_method.split(',')
         opt.jpg_qual = [int(s) for s in opt.jpg_qual.split(',')]
+        opt.testsets = [name.strip() for name in opt.testsets.split(',') if name.strip()]
+        if not opt.testsets:
+            self.parser.error('--testsets must contain at least one dataset name')
         if len(opt.jpg_qual) == 2:
             opt.jpg_qual = list(range(opt.jpg_qual[0], opt.jpg_qual[1] + 1))
         elif len(opt.jpg_qual) > 2:
