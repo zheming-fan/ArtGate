@@ -1,6 +1,6 @@
 # ArtGate
 
-论文 **[“ArtGate: Injecting Fake Artifact Features into CLIP for AI-Generated Image Detection”](https://ieeexplore.ieee.org/document/11523662)** 官方代码，已被 IEEE Transactions on Multimedia 接收。
+论文 **[“ArtGate: Injecting Fake Artifact Features into CLIP for AI-Generated Image Detection”](https://ieeexplore.ieee.org/document/11523662)** 官方代码，已被 IEEE Transactions on Multimedia 接收（2026）。
 
 ![ArtGate 方法概览](figure.png)
 
