@@ -49,17 +49,17 @@ Download [AIGCDetectBenchMark](https://github.com/Ekko-zn/AIGCDetectBenchmark). 
 ```bash
 CUDA_VISIBLE_DEVICES=0 python ArtGate_eval.py \
   --model_path ./weights/model_artgate_progan.pth \
-  --image_path /path/to/image.png
+  --image_path figure.png
 ```
 
 The command prints the predicted class, AI-generated probability, and raw model logit as JSON:
 
 ```json
 {
-  "image": "/path/to/image.png",
-  "prediction": "fake",
-  "fake_probability": 0.9821,
-  "logits": [4.0123]
+  "image": "/home/ubuntu/2026/ArtGate/figure.png",
+  "prediction": "real",
+  "fake_probability": 0.17971085011959076,
+  "logits": [-1.5183076858520508]
 }
 ```
 
