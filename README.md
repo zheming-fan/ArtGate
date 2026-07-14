@@ -2,6 +2,8 @@
 
 Official code for **“ArtGate: Injecting Fake Artifact Features into CLIP for AI-Generated Image Detection”**, accepted by IEEE Transactions on Multimedia.
 
+> 中文文档：[README_zh.md](README_zh.md)
+
 ![Overview of ArtGate](figure.png)
 
 ## Environment setup
@@ -50,7 +52,7 @@ CUDA_VISIBLE_DEVICES=0 python ArtGate_eval.py \
   --image_path /path/to/image.png
 ```
 
-The command prints the prediction, fake probability, and raw model logit as JSON:
+The command prints the predicted class, AI-generated probability, and raw model logit as JSON:
 
 ```json
 {
@@ -78,7 +80,7 @@ CUDA_VISIBLE_DEVICES=0 python ArtGate_eval.py \
   --noise_type jpeg
 ```
 
-For a quick test, read at most 100 real and 100 fake images from each test subset:
+Use the `--max_test_image` option for a quick test:
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 python ArtGate_eval.py \

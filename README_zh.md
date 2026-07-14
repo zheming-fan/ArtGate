@@ -52,7 +52,7 @@ CUDA_VISIBLE_DEVICES=0 python ArtGate_eval.py \
   --image_path figure.png
 ```
 
-命令会以 JSON 格式输出预测类别、伪造概率和模型原始 logit：
+命令会以 JSON 格式输出预测类别、AI生成概率和模型原始 logit：
 
 ```json
 {
@@ -80,7 +80,7 @@ CUDA_VISIBLE_DEVICES=0 python ArtGate_eval.py \
   --noise_type jpeg
 ```
 
-每个测试子集最多读取 100 张真实图像和 100 张伪造图像，进行快速测试：
+通过--max_test_image参数可进行进行快速测试：
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 python ArtGate_eval.py \
