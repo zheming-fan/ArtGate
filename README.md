@@ -2,6 +2,8 @@
 
 Official code for **“ArtGate: Injecting Fake Artifact Features into CLIP for AI-Generated Image Detection”**, accepted by IEEE Transactions on Multimedia.
 
+![Overview of ArtGate](figure.png)
+
 ## Environment setup
 
 This project supports NVIDIA GPU inference only. Python 3.10 is recommended. Run the following commands in order.
@@ -16,10 +18,10 @@ python -m pip install --upgrade pip setuptools wheel
 
 ### 2. Install the CUDA build of PyTorch
 
-Install the CUDA 12.4 build:
+Install the CUDA 11.8 build:
 
 ```bash
-python -m pip install torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cu124
+python -m pip install torch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 --index-url https://download.pytorch.org/whl/cu118
 ```
 
 ### 3. Install project dependencies
@@ -29,15 +31,6 @@ Run the following command from the ArtGate repository root:
 ```bash
 python -m pip install -r requirements.txt
 ```
-
-### 4. Verify the environment
-
-```bash
-python -c "import torch, torchvision, transformers, peft, kornia, sklearn; print('torch:', torch.__version__); print('torchvision:', torchvision.__version__); print('transformers:', transformers.__version__); print('peft:', peft.__version__); print('CUDA available:', torch.cuda.is_available()); print('CUDA runtime:', torch.version.cuda)"
-nvidia-smi
-```
-
-`CUDA available` should print `True`.
 
 ## Model weight
 
@@ -49,15 +42,63 @@ Download [AIGCDetectBenchMark](https://github.com/Ekko-zn/AIGCDetectBenchmark). 
 
 ## Evaluation
 
+### Single-image inference
+
 ```bash
-python ArtGate_eval.py \
+CUDA_VISIBLE_DEVICES=0 python ArtGate_eval.py \
+  --model_path ./weights/model_artgate_progan.pth \
+  --image_path /path/to/image.png
+```
+
+The command prints the prediction, fake probability, and raw model logit as JSON:
+
+```json
+{
+  "image": "/path/to/image.png",
+  "prediction": "fake",
+  "fake_probability": 0.9821,
+  "logits": [4.0123]
+}
+```
+
+### Dataset evaluation
+
+```bash
+CUDA_VISIBLE_DEVICES=0 python ArtGate_eval.py \
   --model_path ./weights/model_artgate_progan.pth \
   --dataset_root /path/to/AIGCDetectBenchMark/test
 ```
 
-Use `--max_test_image 100` for a quick test on fewer images. On a multi-GPU machine, select a GPU with `--device cuda:1`. CSV output is written to `results/ArtGate/`.
+To evaluate with random JPEG compression:
+
+```bash
+CUDA_VISIBLE_DEVICES=0 python ArtGate_eval.py \
+  --model_path ./weights/model_artgate_progan.pth \
+  --dataset_root /path/to/AIGCDetectBenchMark/test \
+  --noise_type jpeg
+```
+
+For a quick test, read at most 100 real and 100 fake images from each test subset:
+
+```bash
+CUDA_VISIBLE_DEVICES=0 python ArtGate_eval.py \
+  --model_path ./weights/model_artgate_progan.pth \
+  --dataset_root /path/to/AIGCDetectBenchMark/test \
+  --max_test_image 100
+```
+
+On a multi-GPU machine, select a GPU with `--device cuda:1`. CSV output is written to `results/ArtGate/`.
+
+## Acknowledgments
+
+This project benefited from the implementation and ideas provided by the following open-source repositories. We gratefully acknowledge the authors for making their code and resources publicly available:
+
+- [SAFE](https://github.com/Ouxiang-Li/SAFE)
+- [AIGCDetectBenchmark](https://github.com/Ekko-zn/AIGCDetectBenchmark)
 
 ## Citation
+
+If you find this work useful in your research, please cite our paper:
 
 ```bibtex
 @article{fan2026artgate,

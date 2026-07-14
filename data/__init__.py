@@ -2,7 +2,7 @@ import torch
 import numpy as np
 from torch.utils.data.sampler import WeightedRandomSampler
 from .datasets import dataset_folder
-from .datasets import read_data_artgate
+from .datasets import preprocess_artgate_image, read_data_artgate
 
 def get_dataset(opt):
     dset_lst = []

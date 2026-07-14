@@ -3,8 +3,9 @@
 """
 from __future__ import absolute_import
 
+from importlib.resources import files
+
 from numpy import load
-from pkg_resources import resource_stream
 try:
     import pywt
     _HAVE_PYWT = True
@@ -19,7 +20,8 @@ def _load_from_file(basename, varnames):
     try:
         mat = COEFF_CACHE[basename]
     except KeyError:
-        with resource_stream('pytorch_wavelets.dtcwt.data', basename + '.npz') as f:
+        resource = files('pytorch_wavelets.dtcwt.data').joinpath(basename + '.npz')
+        with resource.open('rb') as f:
             mat = dict(load(f))
         COEFF_CACHE[basename] = mat
 

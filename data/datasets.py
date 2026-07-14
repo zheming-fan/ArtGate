@@ -82,7 +82,9 @@ def custom_resize(img, opt):
     # print('before resize: '+str(width)+str(height))
     # quit()
     interp = sample_discrete(opt.rz_interp)
-    img = torchvision.transforms.Resize((opt.loadSize,opt.loadSize))(img) 
+    img = torchvision.transforms.Resize(
+        (opt.loadSize, opt.loadSize), antialias=None
+    )(img)
     return img
 
 
@@ -169,7 +171,9 @@ def custom_augment(img, opt):
     if opt.noise_type=='resize':
         
         height, width = img.height, img.width
-        img = torchvision.transforms.Resize((int(height/2),int(width/2)))(img) 
+        img = torchvision.transforms.Resize(
+            (int(height / 2), int(width / 2)), antialias=None
+        )(img)
 
     img = np.array(img)
     # img = img[0:-1:4,0:-1:4,:]
@@ -279,13 +283,24 @@ transform_before_test = transforms.Compose([
 )
 
 transform_train = transforms.Compose([
-    transforms.Resize([256, 256]),
+    transforms.Resize([256, 256], antialias=None),
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])]
 )
 
 transform_test_normalize = transforms.Compose([
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])]
 )
+
+
+def preprocess_artgate_image(img, opt):
+    """Build the CLIP and frequency-branch inputs for one PIL image."""
+    img = custom_augment(img.convert('RGB'), opt)
+    freq_img = transforms.Compose([
+        transforms.CenterCrop(256),
+        transforms.ToTensor(),
+    ])(img)
+    clip_img = processing(img, opt, 'clip')
+    return clip_img, freq_img
 
 
 class read_data_artgate():
@@ -314,25 +329,8 @@ class read_data_artgate():
 
     def __getitem__(self, index):
         img, target = Image.open(self.img[index]).convert('RGB'), self.label[index]
-        imgname = self.img[index]
-        # compute scaling
-        height, width = img.height, img.width
-
-        img = custom_augment(img, self.opt)
-
-
-        trans = transforms.Compose([
-                transforms.CenterCrop(256),
-                transforms.ToTensor(),
-                ])
-        freq_img= trans(img)
-
-
-        img = processing(img,self.opt,'clip')
-
-
-
-        return img, target,freq_img
+        clip_img, freq_img = preprocess_artgate_image(img, self.opt)
+        return clip_img, target, freq_img
 
     def __len__(self):
         return len(self.label)

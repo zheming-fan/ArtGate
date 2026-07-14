@@ -114,7 +114,9 @@ def custom_resize(img, opt):
     # quit()
     interp = sample_discrete(opt.rz_interp)
     # img = torchvision.transforms.Resize((int(height/2),int(width/2)))(img) 
-    return TF.resize(img, opt.loadSize, interpolation=rz_dict[interp])
+    return TF.resize(
+        img, opt.loadSize, interpolation=rz_dict[interp], antialias=None
+    )
     # return TF.resize(img, (opt.loadSize, opt.loadSize), interpolation=rz_dict[interp])
     # return img
 
@@ -265,7 +267,7 @@ def normlize_np(img):
     return img * 255.   
 
 processimg = transforms.Compose([
-            transforms.Resize((256, 256)),
+            transforms.Resize((256, 256), antialias=None),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.5, 0.5, 0.5],
                                  std=[0.5, 0.5, 0.5])
@@ -321,7 +323,7 @@ def processing_DCT(img,opt):
     input_img = transforms.ToTensor()(input_img)
     input_img = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])(input_img)
 
-    img = transforms.Resize(opt.loadSize)(img)
+    img = transforms.Resize(opt.loadSize, antialias=None)(img)
     img = transforms.CenterCrop(opt.CropSize)(img)
     cropped_img = torch.from_numpy(dct2_wrapper(img, opt.dct_mean, opt.dct_var)).permute(2,0,1).to(dtype=torch.float)
     return cropped_img
@@ -335,7 +337,7 @@ def processing_PSM(img,opt):
     input_img = transforms.ToTensor()(input_img)
     input_img = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])(input_img)
 
-    img = transforms.Resize(opt.CropSize)(img)
+    img = transforms.Resize(opt.CropSize, antialias=None)(img)
     img = transforms.CenterCrop(opt.CropSize)(img)
     cropped_img = transforms.ToTensor()(img)
     cropped_img = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])(cropped_img)

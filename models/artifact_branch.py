@@ -157,7 +157,9 @@ class ResNet(nn.Module):
         from pytorch_wavelets import DWTForward, DWTInverse
         DWT_filter = DWTForward(J=1, mode=mode, wave=wave).to(x.device)
         Yl, Yh = DWT_filter(x)
-        return transforms.Resize([x.shape[-2], x.shape[-1]])(Yh[0][:, :, 2, :, :])
+        return transforms.Resize(
+            [x.shape[-2], x.shape[-1]], antialias=None
+        )(Yh[0][:, :, 2, :, :])
 
     def _preprocess_fft(self, x, scale=8):
         from torch.nn import functional as F

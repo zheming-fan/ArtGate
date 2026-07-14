@@ -1,6 +1,6 @@
 import unittest
 
-from validate import compute_metrics
+from evaluation.metrics import compute_metrics
 
 
 class MetricsTest(unittest.TestCase):
